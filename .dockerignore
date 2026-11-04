@@ -1,0 +1,36 @@
+**/__pycache__/
+*.py[cod]
+*$py.class
+.Python
+env/
+venv/
+.venv/
+
+.env
+.env.*
+!.env.example
+secrets/
+certs/
+
+
+# --- Логи и дампы ---
+*.log
+logs/
+*.swp
+*.bak
+
+.DS_Store
+Thumbs.db
+.git/
+.gitignore
+.github/
+.gitlab-ci.yml
+
+# --- Конфиги IDE ---
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
