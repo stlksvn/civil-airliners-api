@@ -12,6 +12,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 COPY . .
 
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen
+
 EXPOSE 8000
 
-CMD ["uv", "run", "uvicorn", "main:app", "--app-dir", "app", "--host", "0.0.0.0", "--port", "8000"]
+CMD [".venv/bin/uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -1,2 +1,2 @@
-# rest-app
+# avia-api
 

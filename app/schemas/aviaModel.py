@@ -12,7 +12,7 @@ class AviaMetricsBase(BaseModel):
     speed: float = Field(..., description="Скорость полета")
     latitude: float = Field(..., description="Географическая широта")
     longitude: float = Field(..., description="Географическая долгота")
-    lainerStatus: Literal["Ожидание взлета", "В полете", "Подготовка"] = Field(
+    linerStatus: Literal["Ожидание взлета", "В полете", "Подготовка"] = Field(
         ..., description="Статус"
     )
     roll: float = Field(0.0, description="Крен судна")

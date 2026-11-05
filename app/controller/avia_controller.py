@@ -1,8 +1,11 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
+from sqlalchemy.orm import Session
 from typing import List
-from schemas.aviaModel import AviaMetricsCreate, AviaMetrics
-from service.avia_service import AviaMetricsService
-from locales import get_locale
+
+from app.database import get_db
+from app.schemas.aviaModel import AviaMetricsCreate, AviaMetrics
+from app.service.avia_service import AviaMetricsService
+from app.locales import get_locale
 
 avia_service = AviaMetricsService()
 router = APIRouter(prefix="/metrics", tags=["Avia Metrics"])
@@ -28,8 +31,12 @@ def generate_hateoas_links(request: Request, record_id: int, locale: dict) -> di
     summary="Получить все данные лайнера",
     name="get_all_metrics",
 )
-def get_all_metrics(request: Request, locale: dict = Depends(get_locale)):
-    records = avia_service.get_all()
+def get_all_metrics(
+    request: Request,
+    db: Session = Depends(get_db),
+    locale: dict = Depends(get_locale),
+):
+    records = avia_service.get_all(db)
     for item in records:
         item["links"] = generate_hateoas_links(request, item["id"], locale)
     return records
@@ -41,8 +48,13 @@ def get_all_metrics(request: Request, locale: dict = Depends(get_locale)):
     summary="Получить данные лайнера по ID",
     name="get_metric",
 )
-def get_metric(record_id: int, request: Request, locale: dict = Depends(get_locale)):
-    result = avia_service.get_by_id(record_id)
+def get_metric(
+    record_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    locale: dict = Depends(get_locale),
+):
+    result = avia_service.get_by_id(db, record_id)
     if not result:
         raise HTTPException(status_code=404, detail=locale["not_found"])
     result["links"] = generate_hateoas_links(request, record_id, locale)
@@ -57,9 +69,12 @@ def get_metric(record_id: int, request: Request, locale: dict = Depends(get_loca
     name="create_metric",
 )
 def create_metric(
-    metric: AviaMetricsCreate, request: Request, locale: dict = Depends(get_locale)
+    metric: AviaMetricsCreate,
+    request: Request,
+    db: Session = Depends(get_db),
+    locale: dict = Depends(get_locale),
 ):
-    result = avia_service.create(metric)
+    result = avia_service.create(db, metric)
     result["links"] = generate_hateoas_links(request, result["id"], locale)
     return result
 
@@ -74,9 +89,10 @@ def update_metric(
     record_id: int,
     updated_metric: AviaMetricsCreate,
     request: Request,
+    db: Session = Depends(get_db),
     locale: dict = Depends(get_locale),
 ):
-    result = avia_service.update(record_id, updated_metric)
+    result = avia_service.update(db, record_id, updated_metric)
     if not result:
         raise HTTPException(status_code=404, detail=locale["not_found"])
     result["links"] = generate_hateoas_links(request, record_id, locale)
@@ -84,8 +100,12 @@ def update_metric(
 
 
 @router.delete("/{record_id}", summary="Удалить запись о лайнере", name="delete_metric")
-def delete_metric(record_id: int, locale: dict = Depends(get_locale)):
-    success = avia_service.delete(record_id)
+def delete_metric(
+    record_id: int,
+    db: Session = Depends(get_db),
+    locale: dict = Depends(get_locale),
+):
+    success = avia_service.delete(db, record_id)
     if not success:
         raise HTTPException(status_code=404, detail=locale["not_found"])
     return {"message": locale["deleted"].format(record_id=record_id)}

@@ -7,7 +7,7 @@
    * **Ссылка:** https://cyberleninka.ru/article/n/importozavisimost-rossiyskoy-grazhdanskoy-aviatsionnoy-promyshlennosti/viewer
 
 2. **Цифровая трансформация в авиационной индустрии**
-   * **Описание:** Публикация рассматривает концепции Smart Airport и Connected Aircraft. Обосновывает необходимость сквозного сбора телеметрических параметров полета (`altitude`, `speed`, `latitude`, `longitude`) и статуса борта (`lainerStatus`) в реальном времени.
+   * **Описание:** Публикация рассматривает концепции Smart Airport и Connected Aircraft. Обосновывает необходимость сквозного сбора телеметрических параметров полета (`altitude`, `speed`, `latitude`, `longitude`) и статуса борта (`linerStatus`) в реальном времени.
    * **Ссылка:** https://cyberleninka.ru/article/n/tsifrovaya-transformatsiya-v-aviatsionnoy-industrii/viewer
 
 3. **Проблемы управления безопасностью полетов и анализа полетной информации**

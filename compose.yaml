@@ -1,13 +1,43 @@
-version: '3.8'
-
 services:
-  python-service:
-    image: avia-api     
-    container_name: avia_fastapi_app
+  db:
+    image: postgres:16-alpine
+    container_name: avia_postgres
+    environment:
+      POSTGRES_USER: avia
+      POSTGRES_PASSWORD: avia_password
+      POSTGRES_DB: avia_metrics
     ports:
-      - "8000:8000"                 
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U avia -d avia_metrics"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
     networks:
-      - monitoring_network          
+      - monitoring_network
+    restart: unless-stopped
+
+  python-service:
+    image: avia-api:stage-3
+    build:
+      context: .
+    container_name: avia_fastapi_app
+    env_file:
+      - ./.env.${ENVIRONMENT:-prod}
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-prod}
+      DB_HOST: db
+      DB_PORT: "5432"
+    ports:
+      - "8000:8000"
+    networks:
+      - monitoring_network
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
 
   prometheus:
@@ -17,21 +47,21 @@ services:
       - --config.file=/etc/prometheus/prometheus.yaml
       - --storage.tsdb.path=/prometheus
     ports:
-      - "9090:9090"                 
+      - "9090:9090"
     volumes:
       - ./monitoring/prometheus.yaml:/etc/prometheus/prometheus.yaml:ro
       - prometheus_data:/prometheus
     networks:
       - monitoring_network
     depends_on:
-      - python-service              
+      - python-service
     restart: unless-stopped
 
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
-      - "3000:3000"                 
+      - "3000:3000"
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
@@ -42,13 +72,14 @@ services:
     networks:
       - monitoring_network
     depends_on:
-      - prometheus                  
+      - prometheus
     restart: unless-stopped
 
 networks:
   monitoring_network:
-    driver: bridge                  
+    driver: bridge
 
 volumes:
-  grafana_data:                     
-  prometheus_data:                  
+  postgres_data:
+  grafana_data:
+  prometheus_data:
